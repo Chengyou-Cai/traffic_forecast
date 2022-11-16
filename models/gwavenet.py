@@ -137,7 +137,7 @@ class GWNet(nn.Module):
             x2 = F.leaky_relu(self.cat_feature_conv(f2))
             x = x1 + x2
         else:
-            x = self.start_conv(x)
+            x = self.start_conv(x) # torch.Size([bs, 32, 207, 13])
         skip = 0
         adjacency_matrices = self.fixed_supports
         # calculate the current adaptive adj matrix once per iteration

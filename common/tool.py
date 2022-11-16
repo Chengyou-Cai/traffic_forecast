@@ -81,12 +81,20 @@ def load_adj(pkl_fn,adjtype):
 def make_graph_inputs(args,device):
     sensor_ids, sensor_id_to_ind, adj_mx = load_adj(pkl_fn=args.pkl_fn,adjtype=args.adjtype)
     supports = [torch.tensor(i,device=device) for i in adj_mx]
-    aptinit = None if args.randomadj else supports[0]  # ignored without do_graph_conv and add_apt_adj
-    if args.aptonly:
-        if not args.addaptadj and args.do_graph_conv: raise ValueError(
-            'WARNING: not using adjacency matrix')
-        supports = None
-    return aptinit, supports
+    if args.do_graph_conv and args.addaptadj:
+        aptinit = None if args.randomadj else supports[0]
+        if args.aptonly:
+            supports = None
+    else:
+        aptinit = None
+    return aptinit,supports
+    
+    # aptinit = None if args.randomadj else supports[0]  # ignored without do_graph_conv and add_apt_adj
+    # if args.aptonly:
+    #     if not args.addaptadj and args.do_graph_conv: raise ValueError(
+    #         'WARNING: not using adjacency matrix')
+    #     supports = None
+    # return aptinit, supports
 
 def mask_and_fillna(loss, mask):
     loss = loss * mask

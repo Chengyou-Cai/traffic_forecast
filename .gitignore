@@ -1,8 +1,12 @@
 
+tips.*
 _ref/
+__pycache__/
 
 # dataset
 _metr_la/
 _pems_bay/
 
+# file
 *.ipynb
+

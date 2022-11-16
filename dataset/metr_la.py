@@ -1,44 +1,39 @@
 import numpy as np
 from torch.utils.data import Dataset
 
-class StandardScaler():
-    
-    def __init__(self,mean=None,std=None):
-        super(StandardScaler,self).__init__()
-        self.mean = mean
-        self.std = std
-
-    def fit(self,data):
-        self.mean = data.mean()
-        self.std = data.std()
-
-    def transform(self,data):
-        return (data - self.mean)/self.std
-
-    def inverse_transform(self,data):
-        return (data * self.std) + self.mean
-
-
 class METR_LA(Dataset):
 
     def __init__(self,category="train",scaler=None) -> None:
         super(METR_LA,self).__init__()
         assert (category == 'train' or category == 'valid' or category=='test')
-
-        self.npz = np.load('/workspace/traffic_v2/_metr_la/train.npz')
-        if scaler:
-            scaler.fit(self.npz['x'][...,0]) 
-
-        if category == 'valid':
-            self.npz = np.load('/workspace/traffic_v2/_metr_la/valid.npz')
-        elif category == 'test':
-            self.npz = np.load('/workspace/traffic_v2/_metr_la/test.npz')
-
-        self.data = {'x':self.npz['x'], 'y':self.npz['y']}
+        
+        self.data = dict()
+        self.get_data(category=category)
         
         if scaler:
-            self.data['x'][...,0] = scaler.transform(self.npz['x'][...,0])
+            scaler.fit(self.train_npz['x'][...,0]) 
+            self.data['x'][...,0] = scaler.transform(self.data['x'][...,0])
+    
+    def get_data(self,category):
+        if category == "train":
+            self.data['x'],self.data['y'] = self.train_npz['x'], self.train_npz['y']
+        elif category == "valid":
+            self.data['x'],self.data['y'] = self.valid_npz['x'], self.valid_npz['y']
+        else:
+            self.data['x'],self.data['y'] = self.test_npz['x'], self.test_npz['y']
 
+    @property
+    def train_npz(self):
+        return np.load('_metr_la/train.npz')
+
+    @property
+    def valid_npz(self):
+        return np.load('_metr_la/valid.npz')
+
+    @property
+    def test_npz(self):
+        return np.load('_metr_la/test.npz')
+    
     def __getitem__(self, index):
         return self.data['x'][index],self.data['y'][index]
 
