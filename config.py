@@ -11,7 +11,7 @@ class Config():
         
         # hyper parameter
         self.ap.add_argument('--rand_seed', type=int, default=3407,help="torch.manual_seed(3407) is all you need")
-        self.ap.add_argument('--max_epochs', type=int, default=100, help='can be changed depending on your machine')
+        self.ap.add_argument('--max_epochs', type=int, default=2, help='can be changed depending on your machine')
         self.ap.add_argument('--batch_size', type=int, default=128, help='can be changed depending on your machine')
         self.ap.add_argument('--num_workers', type=int, default=0, help='can be changed depending on your machine')
         

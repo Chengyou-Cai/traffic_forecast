@@ -2,6 +2,7 @@
 tips.*
 _ref/
 __pycache__/
+lightning_logs/
 
 # dataset
 _metr_la/

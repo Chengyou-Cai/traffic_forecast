@@ -55,7 +55,7 @@ class GCN(nn.Module):
         supports_list = self.fixed_supports
         if self.addaptadj:
              adp = F.softmax(F.relu(torch.mm(self.nodevec1, self.nodevec2)), dim=1)
-             supports_list += [adp]
+             supports_list = supports_list + [adp] ### += 原地改变 id不变
         # x (b,c,n,l)
         out = [x]
         for adj in supports_list:

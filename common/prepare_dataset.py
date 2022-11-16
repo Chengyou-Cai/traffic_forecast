@@ -81,6 +81,3 @@ def generate_train_valid_test(fdir='_metr_la',fname='metr-la.h5',seq_x_len=12,se
 
 if __name__ == "__main__":
     generate_train_valid_test()
-
-
-

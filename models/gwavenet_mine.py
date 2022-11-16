@@ -64,7 +64,7 @@ class GWNet(nn.Module):
                         )
                 )
                 self.tcnb_sigm_convs.append(
-                    nn.Conv1d(
+                    nn.Conv2d(
                         residual_channels,
                         dilation_channels,
                         (1, kernel_size), 
@@ -77,7 +77,7 @@ class GWNet(nn.Module):
         
         depth = list(range(blocks * layers))
 
-        self.skip_convs = nn.ModuleList([nn.Conv1d(dilation_channels, skip_channels, (1, 1)) for _ in depth])
+        self.skip_convs = nn.ModuleList([nn.Conv2d(dilation_channels, skip_channels, (1, 1)) for _ in depth])
 
         if do_graph_conv:
             self.fixed_supports = supports or []
@@ -93,7 +93,7 @@ class GWNet(nn.Module):
                     num_nodes=num_nodes,
                     dropout=dropout) for _ in depth]
                     )
-        self.residual_convs = nn.ModuleList([nn.Conv1d(dilation_channels, residual_channels, (1, 1)) for _ in depth])
+        self.residual_convs = nn.ModuleList([nn.Conv2d(dilation_channels, residual_channels, (1, 1)) for _ in depth])
         self.bn = nn.ModuleList([nn.BatchNorm2d(residual_channels) for _ in depth])
      
         self.end_conv_1 = nn.Conv2d(skip_channels, end_channels, (1, 1), bias=True)
@@ -163,7 +163,7 @@ class GWNet(nn.Module):
             else:
                 x = self.residual_convs[i](x) 
             
-            x += identity[:, :, :,  -x.size(3):]
+            x = x + identity[:, :, :,  -x.size(3):]
             x = self.bn[i](x) # i=0 torch.Size([bs, 32r, 207, 12])
         
         x = F.relu(skip) # last torch.Size([bs, 256, 207, 1])
@@ -172,5 +172,3 @@ class GWNet(nn.Module):
 
         return x
         
-
-

@@ -5,11 +5,15 @@ import pytorch_lightning as pl
 
 from torch.utils.data import DataLoader
 
+from dataset.traffic_dataset import TrafficDataset
+
 class DataEngine(pl.LightningDataModule):
     
-    def __init__(self, cfg) -> None:
+    def __init__(self, cfg, scaler, data_file_paths) -> None:
         super(DataEngine, self).__init__()
         self.cfg = cfg
+        self.scaler = scaler
+        self.data_file_paths = data_file_paths
 
         self.num_workers = cfg.num_workers
         self.batch_size = cfg.batch_size
@@ -17,15 +21,16 @@ class DataEngine(pl.LightningDataModule):
     def prepare_data(self) -> None:
         pass
     
-    def setup(self, stage='fit',train_set=None,valid_set=None,test_set=None) -> None:
+    def setup(self, stage='fit') -> None:
         assert (stage == 'fit' or stage == 'test')
         if stage == 'fit':
-            self.train_set = train_set
-            self.valid_set = valid_set
+            self.train_set = TrafficDataset(data_file_paths=self.data_file_paths, category='train', scaler=self.scaler)
+            self.valid_set = TrafficDataset(data_file_paths=self.data_file_paths, category='valid', scaler=self.scaler)
         elif stage == 'test':
-            self.test_set = test_set
+            self.test_set = TrafficDataset(data_file_paths=self.data_file_paths, category='train', scaler=self.scaler)
 
     def train_dataloader(self):
+        print(self.train_set)
         return DataLoader(
             dataset=self.train_set,
             batch_size=self.batch_size,
@@ -65,7 +70,7 @@ class SystemV1(pl.LightningModule):
         self.cfg = cfg
         self.scaler = scaler
 
-        self.model = GWNet.from_args(args=cfg,device=self.device)
+        self.model = GWNet.from_args(args=cfg,device="cuda:0")
 
     def configure_optimizers(self):
         optimizer = optim.Adam(self.model.parameters(),lr=self.cfg.lr,weight_decay=self.cfg.wd)
@@ -82,7 +87,7 @@ class SystemV1(pl.LightningModule):
             return None
         ###
         x = F.pad(x,(1,0,0,0)) # (bs,2,207,13)
-        outputs = self.model(x) # (bs,12,207,?)
+        outputs = self.model(x.float()) # (bs,12,207,?)
         outputs = outputs.transpose(1,3) # (bs,?,207,12) ?=1
         preds = self.scaler.inverse_transform(outputs)
         assert  preds.shape[1] == 1
@@ -117,7 +122,7 @@ class SystemV1(pl.LightningModule):
         y_speed = y[:,0,:,:] # (bs,207,12)
         ###
         x = F.pad(x,(1,0,0,0))
-        outputs = self.model(x)
+        outputs = self.model(x.float())
         outputs = outputs.transpose(1,3)
         preds = self.scaler.inverse_transform(outputs)
         preds = torch.clamp(preds, min=0., max=70.)
@@ -148,4 +153,3 @@ class SystemV1(pl.LightningModule):
             "test_step_rmse":rmse,
         }
         self.log_dict(logd)
-
