@@ -3,10 +3,12 @@ from torch.utils.data import Dataset
 
 class METR_LA(Dataset):
 
-    def __init__(self,category="train",scaler=None) -> None:
+    def __init__(self,file_path_dict,category="train",scaler=None) -> None:
         super(METR_LA,self).__init__()
         assert (category == 'train' or category == 'valid' or category=='test')
         
+        self.file_path_dict = file_path_dict
+
         self.data = dict()
         self.get_data(category=category)
         
@@ -24,15 +26,15 @@ class METR_LA(Dataset):
 
     @property
     def train_npz(self):
-        return np.load('_metr_la/train.npz')
+        return np.load(self.file_path_dict["train"])
 
     @property
     def valid_npz(self):
-        return np.load('_metr_la/valid.npz')
+        return np.load(self.file_path_dict["valid"])
 
     @property
     def test_npz(self):
-        return np.load('_metr_la/test.npz')
+        return np.load(self.file_path_dict["test"])
     
     def __getitem__(self, index):
         return self.data['x'][index],self.data['y'][index]

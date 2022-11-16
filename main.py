@@ -40,13 +40,19 @@ def main():
     cfg = init_config()
     print(cfg,"\n")
 
+    metr_la_files = {
+        "train":'_metr_la/train.npz',
+        "valid":'_metr_la/valid.npz',
+        "test":'_metr_la/test.npz'
+    }
+
     scaler = StandardScaler()
-    train_set = METR_LA(category='train',scaler = scaler)
-    valid_set = METR_LA(category='valid',scaler = scaler)
-    test_set = METR_LA(category='test',scaler = scaler)
+    train_set = METR_LA(file_path_dict=metr_la_files, category='train', scaler=scaler)
+    valid_set = METR_LA(file_path_dict=metr_la_files, category='valid', scaler=scaler)
+    test_set = METR_LA(file_path_dict=metr_la_files, category='test', scaler=scaler)
 
     fit_model(cfg,train_set,valid_set,scaler=scaler)
-    test_model(cfg,test_set)
+    test_model(cfg,test_set,scaler=scaler)
 
 if __name__ == "__main__":
     main()
