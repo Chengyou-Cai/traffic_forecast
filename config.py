@@ -1,5 +1,3 @@
-from ast import arg
-import os
 import argparse
 
 ADJ_CHOICES = ['scalap', 'normlap', 'symnadj', 'transition', 'identity']
