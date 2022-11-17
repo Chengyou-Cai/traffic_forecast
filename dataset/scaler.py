@@ -11,7 +11,7 @@ class StandardScaler():
         self.std = data.std()
 
     def transform(self,data,fill_zeros=True):
-        if fill_zeros:
+        if fill_zeros: # improvements
             mask = (data == 0)
             data[mask] = self.mean
         return (data - self.mean)/self.std

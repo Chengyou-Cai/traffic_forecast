@@ -37,7 +37,26 @@ def fit_model(cfg,scaler=None,data_file_paths=None):
     trainer.fit(model=model_system,datamodule=data_engine)
 
 def test_model(cfg,scaler=None,data_file_paths=None):
-    print("start testing... not completed")
+    print("start testing...")
+    data_engine = DataEngine(
+        cfg=cfg,
+        scaler=scaler,
+        data_file_paths=data_file_paths
+    )
+    data_engine.setup("test")
+    model_system = SystemV1.load_from_checkpoint(
+        'lightning_logs/version_1/checkpoints/epoch=104-step=19740.ckpt',
+        cfg=cfg,scaler=scaler
+        )
+    trainer = pl.Trainer(
+        accelerator="gpu",
+        devices=1,
+        auto_select_gpus=True,
+        # min_epochs=1,
+        # max_epochs=cfg.max_epochs,
+        # check_val_every_n_epoch=1,
+    )
+    trainer.test(model=model_system,datamodule=data_engine)
 
 def main():
     cfg = init_config()

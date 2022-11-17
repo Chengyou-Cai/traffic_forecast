@@ -92,26 +92,35 @@ class SystemV1(pl.LightningModule):
         preds = self.scaler.inverse_transform(outputs)
         assert  preds.shape[1] == 1
         preds = preds.squeeze(1) # (bs,207,12)
-        mae, mape, rmse = calc_metrics(preds=preds,labels=y_speed)
+        mae, rmse, mape = calc_metrics(preds=preds,labels=y_speed)
         ###
-        return {"loss":mae,"mape":mape,"rmse":rmse}
+
+        logd = {
+            "train_loss":mae,
+            "train_rmse":rmse,
+            "train_mape":mape,
+        }
+
+        self.log_dict(logd,on_step=True,on_epoch=True)
+
+        return {"loss":mae,"rmse":rmse,"mape":mape}
 
     def on_after_backward(self) -> None:
         
         if self.cfg.clip:
             nn.utils.clip_grad_norm_(self.model.parameters(), self.cfg.clip)
 
-    def training_epoch_end(self, outputs) -> None:
+    # def training_epoch_end(self, outputs) -> None:
         
-        avg_loss = torch.stack([out['loss'] for out in outputs]).mean()
-        avg_mape = torch.stack([out['mape'] for out in outputs]).mean()
-        avg_rmse = torch.stack([out['rmse'] for out in outputs]).mean()
-        logd = {
-            "train_epoch_avg_loss":avg_loss,
-            "train_epoch_avg_mape":avg_mape,
-            "train_epoch_avg_rmse":avg_rmse,
-        }
-        self.log_dict(logd)
+    #     avg_loss = torch.stack([out['loss'] for out in outputs]).mean()
+    #     avg_mape = torch.stack([out['mape'] for out in outputs]).mean()
+    #     avg_rmse = torch.stack([out['rmse'] for out in outputs]).mean()
+    #     logd = {
+    #         "train_epoch_avg_loss":avg_loss,
+    #         "train_epoch_avg_mape":avg_mape,
+    #         "train_epoch_avg_rmse":avg_rmse,
+    #     }
+    #     self.log_dict(logd)
     
     @torch.no_grad()
     def _shared_eval_step(self,batch):
@@ -127,29 +136,29 @@ class SystemV1(pl.LightningModule):
         preds = self.scaler.inverse_transform(outputs)
         preds = torch.clamp(preds, min=0., max=70.)
         preds = preds.squeeze(1)
-        mae, mape, rmse = calc_metrics(preds=preds,labels=y_speed)
+        mae, rmse, mape = calc_metrics(preds=preds,labels=y_speed)
         ###
-        return mae,mape,rmse
+        return mae,rmse,mape
     
 
     def validation_step(self, batch, batch_idx):
 
-        loss,mape,rmse = self._shared_eval_step(batch)
+        mae,rmse,mape = self._shared_eval_step(batch)
         
         logd = {
-            "valid_step_loss":loss,
-            "valid_step_mape":mape,
-            "valid_step_rmse":rmse,
+            "valid_loss":mae,
+            "valid_rmse":rmse,
+            "valid_mape":mape,
         }
-        self.log_dict(logd)
+        self.log_dict(logd) # on_step=False,on_epoch=True
 
     def test_step(self, batch, batch_idx):
         
-        loss,mape,rmse = self._shared_eval_step(batch)
+        mae,rmse,mape = self._shared_eval_step(batch)
         
         logd = {
-            "test_step_loss":loss,
-            "test_step_mape":mape,
-            "test_step_rmse":rmse,
+            "test_loss":mae,
+            "test_rmse":rmse,
+            "test_mape":mape,
         }
-        self.log_dict(logd)
+        self.log_dict(logd) # on_step=False,on_epoch=True
