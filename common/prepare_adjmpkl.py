@@ -32,5 +32,17 @@ def generate_pkl(fdir='_metr_la/sensor_graph',fname='distances_la_2012.csv'):
     with open(os.path.join(fdir,'adjmatrix.pkl'), 'wb') as f:
         pickle.dump([sensor_ids, sensor_id_to_ind, adj_mx], f, protocol=2)
 
+import argparse
+
 if __name__ == "__main__":
-    generate_pkl()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--fdir', type=str, default='_metr_la/sensor_graph',help="sensor graph dir")
+    parser.add_argument('--fname', type=str, default='distances_la_2012.csv',help="sensor distances file")
+    args = parser.parse_args()
+    
+    print(args)
+    
+    generate_pkl(
+        fdir=args.fdir,
+        fname=args.fname
+        )

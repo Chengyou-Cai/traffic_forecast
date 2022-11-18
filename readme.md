@@ -38,3 +38,15 @@ Download Links：[Google Drive](https://drive.google.com/drive/folders/10FOTa6HX
 streamlit is being used to build the app.
 
 ## Pipeline of Commands
+
+### Data Preprocessing
+
+```cmd
+cmd> cd traffic_forecast
+
+cmd> python common/prepare_adjmpkl.py --fdir=_metr_la/sensor_graph --fname=distances_la_2012.csv
+
+cmd> python common/prepare_dataset.py --fdir=_metr_la --fname=metr-la.h5 --seq_x_len=12 --seq_y_len=12
+```
+
+### Train, Valid, Test
