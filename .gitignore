@@ -4,6 +4,8 @@ _ref/
 __pycache__/
 lightning_logs/
 
+pages/
+
 # dataset
 _metr_la/
 _pems_bay/

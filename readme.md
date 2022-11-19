@@ -24,7 +24,7 @@ Download Links：[Google Drive](https://drive.google.com/drive/folders/10FOTa6HX
 |----|----|
 |DCRNN|3.60|
 |[GWN](https://github.com/nnzhan/Graph-WaveNet)|3.55|
-|[GWNV2](https://github.com/sshleifer/Graph-WaveNet) (models/gwavenet.py)|3.45|
+|[GWNV2](https://github.com/sshleifer/Graph-WaveNet)|3.45|
 |GWN_M (models/gwavenet_mine.py)|3.32|
 
 ### Traffic Transformer
