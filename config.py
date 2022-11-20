@@ -38,8 +38,10 @@ class Config():
         self.ap.add_argument('--num_nodes', type=int, default=207, help='num of nodes') ###########
         self.ap.add_argument('--nhid', type=int, default=40, help='num of hidden layers') # improvements
         self.ap.add_argument('--in_dim', type=int, default=2)
+        
         self.ap.add_argument('--seq_len', type=int, default=12) ###########
-
+        self.ap.add_argument('--seq_x_len', type=int, default=12)
+        self.ap.add_argument('--seq_y_len', type=int, default=12)
 
     def parse(self):
         self.cfg = self.ap.parse_args()

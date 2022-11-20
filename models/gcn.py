@@ -23,7 +23,7 @@ class GCN(nn.Module):
         super().__init__()
         self.order = order
         self.dropout = dropout
-        self.fixed_supports = fixed_supports
+        self.fixed_supports = fixed_supports or []
         self.suppports_len = len(fixed_supports)
         
         self.addaptadj = addaptadj
