@@ -13,6 +13,7 @@ class GraphEmbedding(nn.Module):
         order=2,
         drop_prob=0.1
         ):
+        super(GraphEmbedding,self).__init__()
         # if config.do_graph_conv:
         aptinit, fixed_supports = make_graph_inputs(args=config,device=device)
 
@@ -39,6 +40,7 @@ import torch.nn.functional as F
 class LearnedPositionalEncoding(nn.Module):
 
     def __init__(self,seq_len,d_model,drop_prob=0.1):
+        super(LearnedPositionalEncoding,self).__init__()
         self.pe = nn.Parameter(torch.randn(1, seq_len, d_model))
         self.drop = nn.Dropout(p=drop_prob)
 
@@ -55,7 +57,7 @@ class FeatConv(nn.Module):
         feat2_in_channels,
         out_channels=32
         ):
-
+        super(FeatConv,self).__init__()
         self.feat1_conv = nn.Conv2d(
             in_channels=feat1_in_channels,
             out_channels=out_channels,
@@ -80,20 +82,20 @@ class FeatConv(nn.Module):
         return x
 
 class TrafficTransformer(nn.Module):
-
+    # plane 平面
     def __init__(
         self,config,device,
         d_model=256,
-        in_planes=2, # plane 平面
+        in_planes=2, 
         feat_planes=32,
         gcn_planes=32,
-        seq_len=12,
-        drop_prob=0.1
+        seq_len=12,drop_prob=0.1
         ):
-
+        super(TrafficTransformer,self).__init__()
+        
         self.feat_extractor = FeatConv(
-            feat1_in_chan=1,
-            feat2_in_chan=in_planes-1,
+            feat1_in_channels=1,
+            feat2_in_channels=in_planes-1,
             out_channels=feat_planes
             )
 
@@ -149,7 +151,7 @@ class TrafficTransformer(nn.Module):
         src = self.fc(src) # (bs,seq_len,d_model)
         tgt = self.fc(tgt)
 
-        tgt_mask = nn.Transformer.generate_square_subsequent_mask(tgt.size(1))
+        tgt_mask = nn.Transformer.generate_square_subsequent_mask(tgt.size(1)).to(device="cuda:0")
 
         src, tgt = self.pos_emb(src), self.pos_emb(tgt) # (bs,seq_len,d_model)
 

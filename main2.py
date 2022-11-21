@@ -2,9 +2,11 @@ import os
 import pytorch_lightning as pl
 
 from config import Config
-from engine import DataEngine,SystemTrans
+from engine import DataEngine,SystemTTNet
 
 from dataset.scaler import StandardScaler
+
+from pytorch_lightning.callbacks import ModelCheckpoint
 
 def init_config():
     cfg = Config().parse()
@@ -12,18 +14,39 @@ def init_config():
     os.environ["CUDA_VISIBLE_DEVICES"] = cfg.gpus
     return cfg
 
-def fit_model(cfg,scaler=None,data_file_paths=None):
+def fit_model(cfg,scaler=None,data_engine=None,trainer=None):
     print("start fitting...")
     
+    data_engine.setup(stage='fit')
+    model_system = SystemTTNet(config=cfg,scaler=scaler)
+    trainer.fit(model=model_system,datamodule=data_engine)
+
+def test_model(cfg,scaler=None,data_engine=None,trainer=None):
+    print("start testing...")
+    print(ckpt_callback1.best_model_path)
+    
+    data_engine.setup("test")
+    model_system = SystemTTNet.load_from_checkpoint(
+        ckpt_callback1.best_model_path,
+        config=cfg,scaler=scaler
+        )
+    trainer.test(model=model_system,datamodule=data_engine)
+
+def main():
+    cfg = init_config(); print(cfg,"\n"); 
+
+    scaler = StandardScaler()
+
+    data_file_paths = {
+        "train":'_metr_la/train.npz',
+        "valid":'_metr_la/valid.npz',
+        "test":'_metr_la/test.npz'
+    }
     data_engine = DataEngine(
         cfg=cfg,
         scaler=scaler,
         data_file_paths=data_file_paths
-        )
-    
-    data_engine.setup(stage='fit')
-    
-    model_system = SystemTrans(config=cfg,scaler=scaler)
+    )
 
     trainer = pl.Trainer(
         accelerator='gpu',
@@ -32,46 +55,21 @@ def fit_model(cfg,scaler=None,data_file_paths=None):
         min_epochs=1,
         max_epochs=cfg.max_epochs,
         check_val_every_n_epoch=1,
+        callbacks=[ckpt_callback1]
         # precision=64
     )
-    trainer.fit(model=model_system,datamodule=data_engine)
 
-def test_model(cfg,scaler=None,data_file_paths=None):
-    print("start testing...")
-    data_engine = DataEngine(
-        cfg=cfg,
-        scaler=scaler,
-        data_file_paths=data_file_paths
-    )
-    data_engine.setup("test")
-    model_system = SystemTrans.load_from_checkpoint(
-        'lightning_logs/version_1/checkpoints/epoch=104-step=19740.ckpt',
-        config=cfg,scaler=scaler
-        )
-    trainer = pl.Trainer(
-        accelerator="gpu",
-        devices=1,
-        auto_select_gpus=True,
-        # min_epochs=1,
-        # max_epochs=cfg.max_epochs,
-        # check_val_every_n_epoch=1,
-    )
-    trainer.test(model=model_system,datamodule=data_engine)
-
-def main():
-    cfg = init_config()
-    print(cfg,"\n")
-
-    metr_la_files = {
-        "train":'_metr_la/train.npz',
-        "valid":'_metr_la/valid.npz',
-        "test":'_metr_la/test.npz'
-    }
-
-    scaler = StandardScaler()
-
-    fit_model(cfg,scaler=scaler,data_file_paths=metr_la_files)
-    # test_model(cfg,scaler=scaler,data_file_paths=metr_la_files)
+    fit_model(cfg,scaler=scaler,data_engine=data_engine,trainer=trainer)
+    test_model(cfg,scaler=scaler,data_engine=data_engine,trainer=trainer)
 
 if __name__ == "__main__":
+
+    ckpt_callback1 = ModelCheckpoint(
+        save_top_k=3,
+        monitor="ttnet_valid_loss", ###
+        mode="min",
+        dirpath="ckeckpoint/ttnet/", ###
+        filename="metr_60min_{epoch:02d}_{ttnet_valid_loss:.2f}", ###
+        save_last=True
+    ) 
     main()

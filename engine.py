@@ -63,13 +63,14 @@ from torch.nn import functional as F
 from models.gwavenet_mine import GWNet
 from common.tool import calc_metrics
 
-class SystemV1(pl.LightningModule):
+class SystemGWNet(pl.LightningModule):
 
     def __init__(self,cfg,scaler) -> None:
-        super(SystemV1,self).__init__()
+        super(SystemGWNet,self).__init__()
         self.cfg = cfg
         self.scaler = scaler
 
+        print("load graph wavenet")
         self.model = GWNet.from_args(args=cfg,device="cuda:0")
 
     def configure_optimizers(self):
@@ -96,12 +97,12 @@ class SystemV1(pl.LightningModule):
         ###
 
         logd = {
-            "train_loss":mae,
-            "train_rmse":rmse,
-            "train_mape":mape,
+            "gwnet_train_loss":mae,
+            "gwnet_train_rmse":rmse,
+            "gwnet_train_mape":mape,
         }
 
-        self.log_dict(logd,on_step=True,on_epoch=True)
+        self.log_dict(logd,on_step=True,on_epoch=True,prog_bar=True)
 
         return {"loss":mae,"rmse":rmse,"mape":mape}
 
@@ -109,18 +110,6 @@ class SystemV1(pl.LightningModule):
         
         if self.cfg.clip:
             nn.utils.clip_grad_norm_(self.model.parameters(), self.cfg.clip)
-
-    # def training_epoch_end(self, outputs) -> None:
-        
-    #     avg_loss = torch.stack([out['loss'] for out in outputs]).mean()
-    #     avg_mape = torch.stack([out['mape'] for out in outputs]).mean()
-    #     avg_rmse = torch.stack([out['rmse'] for out in outputs]).mean()
-    #     logd = {
-    #         "train_epoch_avg_loss":avg_loss,
-    #         "train_epoch_avg_mape":avg_mape,
-    #         "train_epoch_avg_rmse":avg_rmse,
-    #     }
-    #     self.log_dict(logd)
     
     @torch.no_grad()
     def _shared_eval_step(self,batch):
@@ -146,32 +135,32 @@ class SystemV1(pl.LightningModule):
         mae,rmse,mape = self._shared_eval_step(batch)
         
         logd = {
-            "valid_loss":mae,
-            "valid_rmse":rmse,
-            "valid_mape":mape,
+            "gwnet_valid_loss":mae,
+            "gwnet_valid_rmse":rmse,
+            "gwnet_valid_mape":mape,
         }
-        self.log_dict(logd) # on_step=False,on_epoch=True
+        self.log_dict(logd,on_epoch=True,prog_bar=True) # default on_step=False,on_epoch=True
 
     def test_step(self, batch, batch_idx):
         
         mae,rmse,mape = self._shared_eval_step(batch)
         
         logd = {
-            "test_loss":mae,
-            "test_rmse":rmse,
-            "test_mape":mape,
+            "gwnet_test_loss":mae,
+            "gwnet_test_rmse":rmse,
+            "gwnet_test_mape":mape,
         }
-        self.log_dict(logd) # on_step=False,on_epoch=True
+        self.log_dict(logd,on_epoch=True,prog_bar=True) # default on_step=False,on_epoch=True
 
 from models.traffic_transformer import TrafficTransformer
 
-class SystemTrans(pl.LightningModule):
+class SystemTTNet(pl.LightningModule):
 
     def __init__(self,config,scaler):
-
+        super(SystemTTNet,self).__init__()
         self.config = config
         self.scaler = scaler
-
+        print("load traffic transformer")
         self.model = TrafficTransformer(
             config=config,
             device='cuda:0',
@@ -206,18 +195,18 @@ class SystemTrans(pl.LightningModule):
         mae, rmse, mape = calc_metrics(preds=preds,labels=y_speed)
 
         logd = {
-            "train_loss":mae,
-            "train_rmse":rmse,
-            "train_mape":mape,
+            "ttnet_train_loss":mae,
+            "ttnet_train_rmse":rmse,
+            "ttnet_train_mape":mape,
         }
 
-        self.log_dict(logd,on_step=True,on_epoch=True)
+        self.log_dict(logd,on_step=True,on_epoch=True,prog_bar=True)
 
         return {"loss":mae,"rmse":rmse,"mape":mape}
 
-    # def on_after_backward(self) -> None:
-    #     if self.cfg.clip:
-    #         nn.utils.clip_grad_norm_(self.model.parameters(), self.cfg.clip)
+    def on_after_backward(self) -> None:
+        if self.config.clip:
+            nn.utils.clip_grad_norm_(self.model.parameters(), self.config.clip)
     
     @torch.no_grad()
     def _shared_eval_step(self,batch):
@@ -233,8 +222,8 @@ class SystemTrans(pl.LightningModule):
         for i in range(1,y.size(3)+1):
             out = self.model(src=src.float(),tgt=tgt.float()) # (bs,2,207,i)
             tgt = torch.concat((tgt,out[...,[-1]]),dim=3) # (bs,2,207,i+1)
-        out = out[:,[0],:,:] # (bs,1,207,12)
-        preds = self.scaler.inverse_transform(out)
+        tgt = tgt[:,[0],:,1:] # (bs,1,207,12)
+        preds = self.scaler.inverse_transform(tgt)
         preds = torch.clamp(preds, min=0., max=70.)
         preds = preds.squeeze(1)
         mae, rmse, mape = calc_metrics(preds=preds,labels=y_speed)
@@ -246,19 +235,19 @@ class SystemTrans(pl.LightningModule):
         mae,rmse,mape = self._shared_eval_step(batch)
         
         logd = {
-            "valid_loss":mae,
-            "valid_rmse":rmse,
-            "valid_mape":mape,
+            "ttnet_valid_loss":mae,
+            "ttnet_valid_rmse":rmse,
+            "ttnet_valid_mape":mape,
         }
-        self.log_dict(logd) # on_step=False,on_epoch=True
+        self.log_dict(logd,on_epoch=True,prog_bar=True) # default on_step=False,on_epoch=True
 
     def test_step(self, batch, batch_idx):
         
         mae,rmse,mape = self._shared_eval_step(batch)
         
         logd = {
-            "test_loss":mae,
-            "test_rmse":rmse,
-            "test_mape":mape,
+            "ttnet_test_loss":mae,
+            "ttnet_test_rmse":rmse,
+            "ttnet_test_mape":mape,
         }
-        self.log_dict(logd) # on_step=False,on_epoch=True
+        self.log_dict(logd,on_epoch=True,prog_bar=True) # default on_step=False,on_epoch=True
