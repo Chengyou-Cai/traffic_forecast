@@ -23,15 +23,22 @@ Download Links：[Google Drive](https://drive.google.com/drive/folders/10FOTa6HX
 |Method|60min MAE (Vehs)|
 |----|----|
 |DCRNN|3.60|
-|[GWN](https://github.com/nnzhan/Graph-WaveNet)|3.55|
-|[GWNV2](https://github.com/sshleifer/Graph-WaveNet)|3.45|
-|GWN_M (models/gwavenet_mine.py)|3.32|
+|[GWNet](https://github.com/nnzhan/Graph-WaveNet)|3.55|
+|[GWNetV2](https://github.com/sshleifer/Graph-WaveNet)|3.45|
+|GWNet_M (models/gwavenet_mine.py)|3.32 ✌|
 
 ### Traffic Transformer
 
 #### Reference
 
 * [Traffic transformer: Capturing the continuity and periodicity of time series for traffic forecasting](https://onlinelibrary.wiley.com/doi/abs/10.1111/tgis.12644)
+
+#### Simple Comparison Results on METR-LA
+
+|Method|60min MAE (Vehs)|
+|----|----|
+|Traffic Transformer|3.28|
+|Replicated Traffic Transformer (models/traffic_transformer.py)|3.66 🤔|
 
 ## Visualization App
 
