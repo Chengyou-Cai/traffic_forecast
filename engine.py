@@ -164,7 +164,10 @@ class SystemTTNet(pl.LightningModule):
         self.model = TrafficTransformer(
             config=config,
             device='cuda:0',
-            d_model=128
+            d_model=64,
+            feat_planes=16,
+            gcn_planes=16,
+            drop_prob=0.35
         )
     
     def configure_optimizers(self):
@@ -185,11 +188,11 @@ class SystemTTNet(pl.LightningModule):
         ### training
         src = x # (bs,2,207,12)
         tgt = torch.concat((x[...,[-1]],y[...,:-1]),dim=3) # (bs,2,207,12)
+        tgt = tgt[:,[0],:,:] # (bs,1,207,12)
         ###
-        out = self.model(src=src.float(),tgt=tgt.float()) # (bs,2,207,seq_len)
-        out = out[:,[0],:,:] # (bs,1,207,12)
-        preds = self.scaler.inverse_transform(out)
+        out = self.model(src=src.float(),tgt=tgt.float()) # (bs,1,207,seq_len)
         
+        preds = self.scaler.inverse_transform(out)
         assert preds.shape[1] == 1
         preds = preds.squeeze(1) # (bs,207,12)
         mae, rmse, mape = calc_metrics(preds=preds,labels=y_speed)
@@ -217,12 +220,12 @@ class SystemTTNet(pl.LightningModule):
         
         ### eval
         src = x # (bs,2,207,12)
-        tgt = x[...,[-1]] # (bs,2,207,1)
+        tgt = x[...,[-1]][:,[0],:,:] # (bs,1,207,1)
         ### 
         for i in range(1,y.size(3)+1):
-            out = self.model(src=src.float(),tgt=tgt.float()) # (bs,2,207,i)
-            tgt = torch.concat((tgt,out[...,[-1]]),dim=3) # (bs,2,207,i+1)
-        tgt = tgt[:,[0],:,1:] # (bs,1,207,12)
+            out = self.model(src=src.float(),tgt=tgt.float()) # (bs,1,207,i)
+            tgt = torch.concat((tgt,out[...,[-1]]),dim=3) # (bs,1,207,i+1)
+        tgt = tgt[:,:,:,1:] # (bs,1,207,12)
         preds = self.scaler.inverse_transform(tgt)
         preds = torch.clamp(preds, min=0., max=70.)
         preds = preds.squeeze(1)
