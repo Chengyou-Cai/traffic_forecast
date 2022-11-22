@@ -20,6 +20,8 @@ class Config():
         self.ap.add_argument('--feat_planes', type=int, default=16)
         self.ap.add_argument('--gcn_planes', type=int, default=16)
         self.ap.add_argument('--drop_prob', type=float, default=0.35)
+        self.ap.add_argument('--num_layers', type=int, default=2)
+        self.ap.add_argument('--dim_ffn', type=int, default=64)
 
         # hyper parameter
         self.ap.add_argument('--rand_seed', type=int, default=3407,help="torch.manual_seed(3407) is all you need")

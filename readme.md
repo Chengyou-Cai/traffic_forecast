@@ -61,5 +61,5 @@ cmd> python common/prepare_dataset.py --fdir=_metr_la --fname=metr-la.h5 --seq_x
 ```cmd
 cmd> cd traffic_forecast
 
-cmd> python main2.py --gpus=0  --use_gpu=cuda:0 --ckpt_fn=ttnet_ep150_feat32_gcn32 --feat_planes=32 --gcn_planes=32
+cmd> python main2.py --gpus=0  --use_gpu=cuda:0 --ckpt_fn=ttnet_ep150_feat8_gcn8_dm64_ly2_df64 --feat_planes=8 --gcn_planes=8 --d_model=64 --num_layers=2 --dim_ffn=64
 ```

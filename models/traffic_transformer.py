@@ -130,8 +130,10 @@ class TrafficTransformer(nn.Module):
             d_model = d_model,
             activation='gelu',
             batch_first=True,
-            dim_feedforward=d_model*gcn_planes,
-            dropout=drop_prob
+            dim_feedforward=config.dim_ffn, #d_model*gcn_planes,
+            dropout=drop_prob,
+            num_encoder_layers=config.num_layers,
+            num_decoder_layers=config.num_layers
         )
 
         self.predictor = nn.Linear(
