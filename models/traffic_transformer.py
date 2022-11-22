@@ -88,6 +88,9 @@ class TrafficTransformer(nn.Module):
         seq_len=12,drop_prob=0.1
         ):
         super(TrafficTransformer,self).__init__()
+
+        self.config = config
+        self.device = device
         
         self.src_feat_extractor = FeatConv(
             feat1_in_channels=1,
@@ -163,7 +166,7 @@ class TrafficTransformer(nn.Module):
         tgt = self.fc[1](tgt)
         src, tgt = self.pos_emb(src), self.pos_emb(tgt) # (bs,seq_len,d_model)
 
-        tgt_mask = nn.Transformer.generate_square_subsequent_mask(tgt.size(1)).to(device="cuda:0")
+        tgt_mask = nn.Transformer.generate_square_subsequent_mask(tgt.size(1)).to(device=self.device)
 
         out = self.transformer( # (bs,seq_len,d_model)
             src=src,

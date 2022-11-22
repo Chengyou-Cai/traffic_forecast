@@ -5,13 +5,25 @@ class Config():
     
     def __init__(self) -> None:
         self.ap = argparse.ArgumentParser()
-        
+
+        # file path
+        self.ap.add_argument('--pkl_fn', type=str, default='_metr_la/sensor_graph/adjmatrix.pkl') ###########
+        self.ap.add_argument('--ckpt_fn', type=str, default='ttnet') ###########
+
+
         # machine environ
         self.ap.add_argument('--gpus', type=str, default='0')
-        
+        self.ap.add_argument('--use_gpu', type=str, default='cuda:0')
+
+        # ttnet hyper parameter
+        self.ap.add_argument('--d_model', type=int, default=64)
+        self.ap.add_argument('--feat_planes', type=int, default=16)
+        self.ap.add_argument('--gcn_planes', type=int, default=16)
+        self.ap.add_argument('--drop_prob', type=float, default=0.35)
+
         # hyper parameter
         self.ap.add_argument('--rand_seed', type=int, default=3407,help="torch.manual_seed(3407) is all you need")
-        self.ap.add_argument('--max_epochs', type=int, default=105, help='can be changed depending on your machine') # 
+        self.ap.add_argument('--max_epochs', type=int, default=150, help='can be changed depending on your machine') # 
         self.ap.add_argument('--batch_size', type=int, default=128, help='can be changed depending on your machine') # 64
         self.ap.add_argument('--num_workers', type=int, default=0, help='can be changed depending on your machine')
         
@@ -20,9 +32,6 @@ class Config():
         self.ap.add_argument('--lrd', type=float, default=0.97, help='learning rate decay') # improvements
         self.ap.add_argument('--clip', type=int, default=3, help='gradient clipping') # improvements
         self.ap.add_argument('--dropout', type=float, default=0.3, help='dropout')
-
-        # file path
-        self.ap.add_argument('--pkl_fn', type=str, default='_metr_la/sensor_graph/adjmatrix.pkl') ###########
 
         self.ap.add_argument('--cat_feat_gc', action='store_true',default=True)
         # others

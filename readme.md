@@ -57,3 +57,9 @@ cmd> python common/prepare_dataset.py --fdir=_metr_la --fname=metr-la.h5 --seq_x
 ```
 
 ### Train, Valid, Test
+
+```cmd
+cmd> cd traffic_forecast
+
+cmd> python main2.py --gpus=0  --use_gpu=cuda:0 --ckpt_fn=ttnet_ep150_feat32_gcn32 --feat_planes=32 --gcn_planes=32
+```

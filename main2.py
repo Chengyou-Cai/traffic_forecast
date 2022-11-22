@@ -2,7 +2,8 @@ import os
 import pytorch_lightning as pl
 
 from config import Config
-from engine import DataEngine,SystemTTNet
+from engine.data_engine import DataEngine
+from engine.system_ttnet import SystemTTNet
 
 from dataset.scaler import StandardScaler
 
@@ -33,7 +34,6 @@ def test_model(cfg,scaler=None,data_engine=None,trainer=None):
     trainer.test(model=model_system,datamodule=data_engine)
 
 def main():
-    cfg = init_config(); print(cfg,"\n"); 
 
     scaler = StandardScaler()
 
@@ -64,12 +64,13 @@ def main():
 
 if __name__ == "__main__":
 
+    cfg = init_config(); print(cfg,"\n"); 
     ckpt_callback1 = ModelCheckpoint(
         save_top_k=3,
-        monitor="ttnet_valid_loss", ###
+        monitor="valid_loss", ###
         mode="min",
-        dirpath="ckeckpoint/ttnet/", ###
-        filename="metr_60min_{epoch:02d}_{ttnet_valid_loss:.2f}", ###
+        dirpath=f"ckeckpoint/{cfg.ckpt_fn}/", ###
+        filename="metr_60min_{epoch:02d}_{valid_loss:.2f}", ###
         save_last=True
     ) 
     main()
