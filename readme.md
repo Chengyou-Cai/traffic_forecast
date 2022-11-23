@@ -39,6 +39,7 @@ Download Links：[Google Drive](https://drive.google.com/drive/folders/10FOTa6HX
 |----|----|
 |Traffic Transformer|3.28|
 |Replicated Traffic Transformer (models/traffic_transformer.py)|3.66 🤔|
+|ttnet_ep150_feat8_gcn8_dm64_ly2_df64_drop15|3.51 🤔|
 
 ## Visualization App
 
@@ -61,5 +62,5 @@ cmd> python common/prepare_dataset.py --fdir=_metr_la --fname=metr-la.h5 --seq_x
 ```cmd
 cmd> cd traffic_forecast
 
-cmd> python main2.py --gpus=0  --use_gpu=cuda:0 --ckpt_fn=ttnet_ep150_feat8_gcn8_dm64_ly2_df64 --feat_planes=8 --gcn_planes=8 --d_model=64 --num_layers=2 --dim_ffn=64
+cmd> python main2.py --gpus=0 --use_gpu=cuda:0 --ckpt_fn=ttnet_ep150_feat8_gcn8_dm64_ly2_df64_drop15 --feat_planes=8 --gcn_planes=8 --d_model=64 --num_layers=2 --dim_ffn=64 --drop_prob=0.15
 ```
