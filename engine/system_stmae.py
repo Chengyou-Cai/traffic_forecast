@@ -15,7 +15,7 @@ class System_P(pl.LightningModule):
         self.config = config
         self.scaler = scaler
 
-        print("load stmae_pretrain ...")
+        print("... load stmae_pretrain system ...")
         self.model = STMAE_pretrain(config=config)
 
     def configure_optimizers(self):
@@ -40,9 +40,9 @@ class System_P(pl.LightningModule):
         f1_mae, f1_rmse, f1_mape = calc_metrics(preds=pred_feat1,labels=x_feat1)
         f2_mae, f2_rmse, f2_mape = calc_metrics(preds=pred_feat2,labels=x_feat2)
 
-        mae = (f1_mae+f2_mae)/2
-        rmse = (f1_rmse+f2_rmse)/2
-        mape = (f1_mape+f2_mape)/2
+        mae = (f1_mae+f2_mae) ###
+        rmse = (f1_rmse+f2_rmse) ###
+        mape = (f1_mape+f2_mape) ###
 
         logd = {
             "p_train_loss":mae,
@@ -81,9 +81,9 @@ class System_P(pl.LightningModule):
         f1_mae, f1_rmse, f1_mape = calc_metrics(preds=pred_feat1,labels=x_feat1)
         f2_mae, f2_rmse, f2_mape = calc_metrics(preds=pred_feat2,labels=x_feat2)
 
-        mae = (f1_mae+f2_mae)/2
-        rmse = (f1_rmse+f2_rmse)/2
-        mape = (f1_mape+f2_mape)/2
+        mae = (f1_mae+f2_mae) ###
+        rmse = (f1_rmse+f2_rmse) ###
+        mape = (f1_mape+f2_mape) ###
 
         ###
         return mae,rmse,mape
@@ -120,14 +120,11 @@ class System_F(pl.LightningModule):
         self.config = config
         self.scaler = scaler
 
-        print("load stmae_finetune ...")
+        print("... load stmae_finetune system ...")
         self.model = STMAE_finetune(config)
 
-        if self.config.load_pre:
-            print("load pretrain param ...")
-            self.load_param()
-
-    def load_param(self):
+    def load_pretrain_param(self):
+        print("... load pretrain param ...")
         model_dict = self.model.state_dict()
         
         param_dict = torch.load(self.config.param_path)['state_dict']

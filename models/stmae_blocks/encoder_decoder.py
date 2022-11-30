@@ -70,8 +70,10 @@ class TemporalEncoder(nn.Module):
     def __init__(
         self,seq_len,d_model,
         nhead,
-        dim_feedforward,dropout,
-        activation,batch_first,
+        dim_feedforward,
+        dropout,
+        activation,
+        batch_first,
         num_layers
         ) -> None:
         super(TemporalEncoder,self).__init__()
@@ -79,19 +81,19 @@ class TemporalEncoder(nn.Module):
         
         self.encoder = nn.TransformerEncoder(
             encoder_layer=nn.TransformerEncoderLayer(
-                d_model=d_model,
-                nhead=nhead,
-                dim_feedforward=dim_feedforward,
-                dropout=dropout,
-                activation=activation,
-                batch_first=batch_first
-            ),
-            num_layers=num_layers,
+                    d_model=d_model,
+                    nhead=nhead,
+                    dim_feedforward=dim_feedforward,
+                    dropout=dropout,
+                    activation=activation,
+                    batch_first=batch_first
+                ),
+            num_layers=num_layers
         )
 
-    def forward(self,x,t_mask=None):
+    def forward(self,x):
         out = self.pos_emb(x)
-        out = self.encoder(out,mask=t_mask)
+        out = self.encoder(out)
         return out
 
 class Decoder(nn.Module):
@@ -103,7 +105,7 @@ class Decoder(nn.Module):
         activation,batch_first,
         num_layers
         ) -> None:
-        super(TemporalEncoder,self).__init__()
+        super(Decoder,self).__init__()
 
         # 使用 Transformer Encoder 作为解码器
         self.encoder = nn.TransformerEncoder(
@@ -113,8 +115,7 @@ class Decoder(nn.Module):
                 dim_feedforward=dim_feedforward,
                 dropout=dropout,
                 activation=activation,
-                batch_first=batch_first,
-                dropout=dropout
+                batch_first=batch_first
             ),
             num_layers=num_layers,
         )

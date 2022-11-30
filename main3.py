@@ -49,6 +49,7 @@ def pretraining(config,scaler,data_engine,dir='pretrain'):
     )
     syst_p = System_P(config=config,scaler=scaler)
     fit_model(trainer=trainer_p,model_system=syst_p,data_engine=data_engine)
+    print("best",ckpt_callback1.best_model_path)
     best_p = System_P.load_from_checkpoint(
         ckpt_callback1.best_model_path,
         config=config,scaler=scaler
@@ -77,8 +78,13 @@ def finetuning(config,scaler,data_engine,dir='finetune'):
         # precision=64
     )
     syst_f = System_F(config=config,scaler=scaler)
+
+    if config.load_pretrain:
+        syst_f.load_pretrain_param()
+    
     fit_model(trainer=trainer_f,model_system=syst_f,data_engine=data_engine)
-    best_f = System_P.load_from_checkpoint(
+    print("best",ckpt_callback2.best_model_path)
+    best_f = System_F.load_from_checkpoint(
         ckpt_callback2.best_model_path,
         config=config,scaler=scaler
     )
@@ -100,7 +106,8 @@ def main():
         scaler=scaler,
         data_file_paths=data_file_paths
     )
-    pretraining(config=cfg,scaler=scaler,data_engine=data_engine)
+    # pretraining(config=cfg,scaler=scaler,data_engine=data_engine)
+    finetuning(config=cfg,scaler=scaler,data_engine=data_engine)
 
 
 if __name__ == "__main__":

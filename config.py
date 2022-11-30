@@ -7,18 +7,18 @@ class MAEConfig():
         self.ap = argparse.ArgumentParser()
         
         # file path
-        self.ap.add_argument('--adjm_fn', type=str, default='_metr_la/sensor_graph/adjmatrix.pkl')
+        self.ap.add_argument('--pkl_fn', type=str, default='_metr_la/sensor_graph/adjmatrix.pkl')
         self.ap.add_argument('--ckpt_fn', type=str, default='stmae')
         
         # gpus
         self.ap.add_argument('--gpus', type=str, default='0')
         self.ap.add_argument('--which_gpu', type=str, default='cuda:0')
 
-        self.ap.add_argument('--load_param', action='store_true')
-        self.ap.add_argument('--param_path', type=str, default='') #####
+        self.ap.add_argument('--load_pretrain', action='store_true',default=True)
+        self.ap.add_argument('--param_path', type=str, default='ckeckpoint/stmae/pretrain_sm015_tm0.5/metr_60min_epoch=146_p_valid_loss=0.35.ckpt') #####
         # pre-training
-        self.ap.add_argument('--s_mask_rate', type=float, default=0.15)
-        self.ap.add_argument('--t_mask_rate', type=float, default=0.5)
+        self.ap.add_argument('--s_mask_rate', type=float, default=0.6)
+        self.ap.add_argument('--t_mask_rate', type=float, default=0.75)
 
         self.ap.add_argument('--seq_len', type=int, default=12)
         self.ap.add_argument('--nod_num', type=int, default=207) # metr-la
@@ -38,7 +38,6 @@ class MAEConfig():
         # fine-tuning # gwnet hyper param
         self.ap.add_argument('--rand_seed', type=int, default=3407,help="torch.manual_seed(3407) is all you need")
         self.ap.add_argument('--max_epochs', type=int, default=150, help='can be changed depending on your machine') # 
-        self.ap.add_argument('--batch_size', type=int, default=128, help='can be changed depending on your machine') # 64
         self.ap.add_argument('--num_workers', type=int, default=0, help='can be changed depending on your machine')
         
         self.ap.add_argument('--lr', type=float, default=0.001, help='learning rate')

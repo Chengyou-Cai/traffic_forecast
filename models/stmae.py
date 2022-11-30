@@ -19,7 +19,7 @@ class STMAE_pretrain(nn.Module):
         
         self.s_token = nn.Parameter(
             torch.randn(
-                self.config.batch_size, 
+                1, 
                 self.config.seq_len, 
                 self.config.nod_num, 
                 self.config.d_channels
@@ -27,10 +27,9 @@ class STMAE_pretrain(nn.Module):
             )
         self.t_token = nn.Parameter(
             torch.randn(
-                self.config.batch_size, 
-                self.config.seq_len, 
-                self.config.nod_num, 
-                self.config.d_channels
+                1, 
+                self.config.seq_len,
+                self.config.mlp_out_chans
                 )
             )
         
@@ -53,7 +52,11 @@ class STMAE_pretrain(nn.Module):
         )
 
         self.pos_emb_d = nn.Parameter(
-            torch.randn(1,self.config.seq_len,self.config.d_model)
+            torch.randn(
+                1,
+                self.config.seq_len,
+                self.config.d_model
+                )
             )
         self.decoder = Decoder(
             d_model=self.config.d_model,
@@ -75,9 +78,8 @@ class STMAE_pretrain(nn.Module):
         bats, chan, node, seql = x.shape # metr-la (bs,2,207,12)
         x = x.permute(0,3,2,1).contiguous() # (bs,12,207,2)
         
-        # self.s_token = self.s_token.expand_as(x)
-        s_token = self.s_token[:,self.s_mask['mask']]
-        x[:,self.s_mask['mask']] = s_token
+        s_token = self.s_token.expand(bats,-1,-1,-1) #####
+        x[:,self.s_mask['mask']] = s_token[:,self.s_mask['mask']]
 
         x = x.reshape(bats,seql,-1)# (bs,12,207*2)
         x = x.permute(0,2,1)# (bs,207*2,12)
@@ -85,16 +87,19 @@ class STMAE_pretrain(nn.Module):
         x = x.permute(0,2,1)# (bs,12,64)
 
         np.random.shuffle(self.t_mask['mask'])
-        
         t_mask = torch.from_numpy(self.t_mask['mask']).cuda()
-        x = self.t_encoder(x,t_mask=~t_mask)# (bs,12,64)
+        
+        x = x[:,~t_mask] ########################### why mask like this?
+        x = self.t_encoder(x)# (bs,? seq_len-mask_num,64)
 
         b, s, c = x.shape
 
-        pos_emb_v = self.pos_emb_d[:,~t_mask].reshape(b,-1,c)
-        pos_emb_m = self.pos_emb_d[:,t_mask].reshape(b,-1,c)
+        pos_emb = self.pos_emb_d.expand(b,-1,-1)
+        pos_emb_v = pos_emb[:,~t_mask].reshape(b,-1,c)
+        pos_emb_m = pos_emb[:,t_mask].reshape(b,-1,c)
 
-        t_token = self.t_token[:,t_mask].reshape(b,-1,c)
+        t_token = self.t_token.expand(bats,-1,-1) ######
+        t_token = t_token[:,t_mask].reshape(b,-1,c)
         feat = torch.cat([
             x + pos_emb_v,t_token + pos_emb_m
         ],dim=1)
@@ -139,10 +144,10 @@ from models.gwavenet_mine import GWNet
 class STMAE_finetune(nn.Module):
 
     def __init__(self,config) -> None:
-        super(STMAE_finetune).__init__()
+        super(STMAE_finetune,self).__init__()
         self.config = config
 
-        if self.config.load_pre:
+        if self.config.load_pretrain:
             self.s_encoder = SpatialEncoder(
                 in_channels=self.config.d_channels*self.config.nod_num,
                 out_channels=self.config.mlp_out_chans,
@@ -171,7 +176,8 @@ class STMAE_finetune(nn.Module):
         x = input.clone()
         bats, chan, node, seql = x.shape # metr-la (bs,2,207,12)
         
-        if self.config.load_pre:
+        if self.config.load_pretrain:
+            #####
             x = x.permute(0,3,2,1).contiguous() # (bs,12,207,2)
             x = x.reshape(bats,seql,-1)# (bs,12,207*2)
             x = x.permute(0,2,1)# (bs,207*2,12)
@@ -185,5 +191,6 @@ class STMAE_finetune(nn.Module):
             x = x.permute(0,3,2,1) # (bs,2,207,12)
 
             x = x + input
+            #####
         x = self.finetuner(x) # (bs,12,207,1)
         return x
