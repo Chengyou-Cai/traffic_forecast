@@ -105,7 +105,7 @@ class GWNet(nn.Module):
             aptinit, supports = make_graph_inputs(args=args,device=device)
         defaults = dict(
             device=device,
-            num_nodes=args.num_nodes,
+            num_nodes=args.nod_num,
             supports=supports,
             do_graph_conv=args.do_graph_conv,
             cat_feat_gc=args.cat_feat_gc,

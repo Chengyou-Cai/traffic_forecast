@@ -39,7 +39,7 @@ Download Links：[Google Drive](https://drive.google.com/drive/folders/10FOTa6HX
 |----|----|
 |Traffic Transformer|3.28|
 |Replicated Traffic Transformer (models/traffic_transformer.py)|3.66 🤔|
-|ttnet_ep150_feat8_gcn8_dm64_ly2_df64_drop15|3.51 🤔|
+|ttnet_ep150_feat8_gcn8_dm64_ly2_df64_drop15|3.42~3.51 🤔|
 
 ## Visualization App
 
