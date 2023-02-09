@@ -1,15 +1,15 @@
-
-tips.*
-_ref/
 __pycache__/
-lightning_logs/
 
-pages/
+_ckpt/**/
+_data/**/
+_logs/**/
 
-# dataset
+# datasets
 _metr_la/
 _pems_bay/
 
-# file
+# notebook
 *.ipynb
+
+*.zip
 
