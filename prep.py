@@ -8,7 +8,11 @@ def prepare_data(config):
     generate_adjmpkl(*os.path.split(dist_file_path))
     print("adjmatrix generated !")
 
-    generate_train_valid_test(*os.path.split(detr_file_path),dsname=config.DATA.NAME)
+    generate_train_valid_test(
+        *os.path.split(detr_file_path),
+        dsname=config.DATA.NAME,
+        seq_x_len=config.DATA.seq_x_len,
+        seq_y_len=config.DATA.seq_y_len)
     print("3datasets generated !")
 
 if __name__ == "__main__":

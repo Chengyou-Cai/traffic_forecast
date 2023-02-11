@@ -24,6 +24,11 @@ class Pems_GWnet_Config(BaseConfig):
     def parse_args(self):
         parser = self.make_parser()
         
+        # DATA
+        parser.add_argument('--seq_x_len', type=int, default=12)
+        parser.add_argument('--seq_y_len', type=int, default=12)
+
+        # MODS
         parser.add_argument('--do_graph_conv', action='store_true',default=True,help='whether to add graph convolution layer')
         parser.add_argument('--adjtype', type=str, default='doubletransition', help='adj type', choices=ADJ_CHOICES)
         parser.add_argument('--addaptadj', action='store_true', default=True, help='whether add adaptive adj')
@@ -36,9 +41,5 @@ class Pems_GWnet_Config(BaseConfig):
         parser.add_argument('--nod_num', type=int, default=207, help='num of nodes') ###########
         parser.add_argument('--nhid', type=int, default=40, help='num of hidden layers') # improvements
         parser.add_argument('--in_dim', type=int, default=2)
-        
-        parser.add_argument('--seq_len', type=int, default=12) ###########
-        parser.add_argument('--seq_x_len', type=int, default=12)
-        parser.add_argument('--seq_y_len', type=int, default=12)
 
         return parser.parse_args()

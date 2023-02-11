@@ -7,9 +7,9 @@ class Metr_GWnet_Config(BaseConfig):
     def __init__(self,experiment_identifier:str=None) -> None:
         super(Metr_GWnet_Config,self).__init__()
 
-        self.exid = self.__class__.__name__[:-7].lower()
+        self.EXID = self.__class__.__name__[:-7].lower()
         if experiment_identifier:
-            self.exid = experiment_identifier.lower()
+            self.EXID = experiment_identifier.lower()
 
         parsed = self.parse_args()
 
@@ -17,14 +17,22 @@ class Metr_GWnet_Config(BaseConfig):
         self.DATA.NAME = "metr"
         self.DATA.ROOT = pathlib.Path("_data/_metr_la")
         self.DATA.DIST_FILE_PATH = (self.DATA.ROOT/"sensor_graph/distances_la_2012.csv") # spatial data of detectors
-        self.DATA.DETR_FILE_PATH = (self.DATA.ROOT/"metr-la.h5")                         # tempore data of detectors                     
+        self.DATA.DETR_FILE_PATH = (self.DATA.ROOT/"metr-la.h5")                         # tempore data of detectors 
+
+        self.DATA.seq_x_len = parsed.seq_x_len
+        self.DATA.seq_y_len = parsed.seq_y_len                 
 
         # MODS
 
 
     def parse_args(self):
         parser = self.make_parser()
-        
+
+        # DATA
+        parser.add_argument('--seq_x_len', type=int, default=12)
+        parser.add_argument('--seq_y_len', type=int, default=12)
+
+        # MODS
         parser.add_argument('--do_graph_conv', action='store_true',default=True,help='whether to add graph convolution layer')
         parser.add_argument('--adjtype', type=str, default='doubletransition', help='adj type', choices=ADJ_CHOICES)
         parser.add_argument('--addaptadj', action='store_true', default=True, help='whether add adaptive adj')
@@ -37,9 +45,5 @@ class Metr_GWnet_Config(BaseConfig):
         parser.add_argument('--nod_num', type=int, default=207, help='num of nodes') ###########
         parser.add_argument('--nhid', type=int, default=40, help='num of hidden layers') # improvements
         parser.add_argument('--in_dim', type=int, default=2)
-        
-        parser.add_argument('--seq_len', type=int, default=12) ###########
-        parser.add_argument('--seq_x_len', type=int, default=12)
-        parser.add_argument('--seq_y_len', type=int, default=12)
 
         return parser.parse_args()
