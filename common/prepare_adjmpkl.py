@@ -23,10 +23,10 @@ def generate_adjmatrix(distances_df, sensor_ids,normalized_k=0.1):
     adj_mx[adj_mx < normalized_k] = 0
     return sensor_ids, sensor_id_to_ind, adj_mx
 
-def generate_pkl(fdir='_metr_la/sensor_graph',fname='distances_la_2012.csv'):
+def generate_adjmpkl(fdir='_data/_metr_la/sensor_graph',file='distances_la_2012.csv'):
     with open(os.path.join(fdir,'graph_sensor_ids.txt')) as f:
         sensor_ids = f.read().strip().split(',')
-    distances_df = pd.read_csv(os.path.join(fdir,fname), dtype={'from': 'str', 'to': 'str'})
+    distances_df = pd.read_csv(os.path.join(fdir,file), dtype={'from': 'str', 'to': 'str'})
     _, sensor_id_to_ind, adj_mx = generate_adjmatrix(distances_df, sensor_ids) # normalized_k=0.1
 
     with open(os.path.join(fdir,'adjmatrix.pkl'), 'wb') as f:
@@ -36,13 +36,13 @@ import argparse
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--fdir', type=str, default='_metr_la/sensor_graph',help="sensor graph dir")
-    parser.add_argument('--fname', type=str, default='distances_la_2012.csv',help="sensor distances file")
+    parser.add_argument('--fdir', type=str, default='_data/_metr_la/sensor_graph',help="sensor graph dir")
+    parser.add_argument('--file', type=str, default='distances_la_2012.csv',help="sensor distances file")
     args = parser.parse_args()
     
     print(args)
     
-    generate_pkl(
+    generate_adjmpkl(
         fdir=args.fdir,
-        fname=args.fname
+        file=args.file
         )

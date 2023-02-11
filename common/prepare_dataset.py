@@ -38,9 +38,9 @@ def generate_graph_seq2seq_io_data(
 
     return x, y
 
-def generate_train_valid_test(fdir='_metr_la',fname='metr-la.h5',seq_x_len=12,seq_y_len=12):
+def generate_train_valid_test(fdir='_data/_metr_la',file='metr-la.h5',dsname="metr",seq_x_len=12,seq_y_len=12):
     
-    df = pd.read_hdf(os.path.join(fdir, fname)) # pemsbay data shape (52116,325)
+    df = pd.read_hdf(os.path.join(fdir, file)) # pemsbay data shape (52116,325)
     
     # 预测窗口 1 hour = 12 * 5 min
     x_offsets = np.sort(np.arange(-(seq_x_len-1), 1, 1)) # array([-11, -10,  -9,  -8,  -7,  -6,  -5,  -4,  -3,  -2,  -1,   0])
@@ -76,7 +76,7 @@ def generate_train_valid_test(fdir='_metr_la',fname='metr-la.h5',seq_x_len=12,se
         _x, _y = locals()["x_" + cat], locals()["y_" + cat]
         print(cat, "x: ", _x.shape, "y:", _y.shape)
         np.savez_compressed(
-            os.path.join(fdir, f"{fdir}_x{seq_x_len}y{seq_y_len}_{cat}.npz"),
+            os.path.join(fdir, f"{dsname}_{cat}_x{seq_x_len}y{seq_y_len}.npz"),
             x=_x,
             y=_y,
             x_offsets=x_offsets.reshape(list(x_offsets.shape) + [1]),
@@ -87,8 +87,8 @@ import argparse
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--fdir', type=str, default='_metr_la',help="data file dir")
-    parser.add_argument('--fname', type=str, default='metr-la.h5',help="data file name")
+    parser.add_argument('--fdir', type=str, default='_data/_metr_la',help="data file dir")
+    parser.add_argument('--file', type=str, default='metr-la.h5',help="data file name")
     parser.add_argument('--seq_x_len', type=int, default=12,help="sequence x length")
     parser.add_argument('--seq_y_len', type=int, default=12,help="sequence y length")
     args = parser.parse_args()
@@ -96,7 +96,7 @@ if __name__ == "__main__":
     print(args)
 
     generate_train_valid_test(
-        fdir=args.fdir,fname=args.fname,
+        fdir=args.fdir,file=args.file,
         seq_x_len=args.seq_x_len,
         seq_y_len=args.seq_y_len
         )
